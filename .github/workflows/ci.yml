@@ -110,7 +110,7 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME_PREFIX: ghcr.io/valaristizabal/parcial-3-golang
+      IMAGE_NAME_PREFIX: ghcr.io/Danistan015/parcial-3-golang
 
     steps:
       - name: Checkout code
