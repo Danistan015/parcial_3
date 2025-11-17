@@ -1,0 +1,8 @@
+/mongo_data
+/bin
+*.log
+*.tar.gz
+*.zip
+*.exe
+*.out
+.env

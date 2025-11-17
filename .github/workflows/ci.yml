@@ -1,0 +1,156 @@
+name: CI - CRUD Clients
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Go tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Run tests for create service
+        run: |
+          cd create
+          go test ./...
+
+      - name: Run tests for read service
+        run: |
+          cd read
+          go test ./...
+
+      - name: Run tests for update service
+        run: |
+          cd update
+          go test ./...
+
+      - name: Run tests for delete service
+        run: |
+          cd delete
+          go test ./...
+
+  build-images:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build create service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./create
+          file: ./create/Dockerfile
+          push: false
+          tags: local/create:latest
+
+      - name: Build read service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./read
+          file: ./read/Dockerfile
+          push: false
+          tags: local/read:latest
+
+      - name: Build update service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./update
+          file: ./update/Dockerfile
+          push: false
+          tags: local/update:latest
+
+      - name: Build delete service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./delete
+          file: ./delete/Dockerfile
+          push: false
+          tags: local/delete:latest
+
+  trivy-scan:
+    name: Security scan with Trivy
+    runs-on: ubuntu-latest
+    needs: build-images
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+
+  push-images:
+    name: Push Docker images to GHCR
+    runs-on: ubuntu-latest
+    needs: build-images
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME_PREFIX: ghcr.io/valaristizabal/parcial-3-golang
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push create image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./create
+          file: ./create/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME_PREFIX }}-create:latest
+
+      - name: Build and push read image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./read
+          file: ./read/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME_PREFIX }}-read:latest
+
+      - name: Build and push update image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./update
+          file: ./update/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME_PREFIX }}-update:latest
+
+      - name: Build and push delete image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./delete
+          file: ./delete/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME_PREFIX }}-delete:latest
