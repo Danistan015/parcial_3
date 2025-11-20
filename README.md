@@ -1,29 +1,34 @@
-# Parcial 3 – Microservicios en Golang con Docker y MongoDB
+Parcial 3 – Microservicios CRUD en Golang con Docker y MongoDB
 
-Este proyecto implementa un sistema de **microservicios CRUD**, donde cada operación (**Create, Read, Update, Delete**) es un microservicio independiente, desarrollado en **Golang**, con base de datos **MongoDB**, completamente contenedorizado con **Docker** y orquestado mediante **Docker Compose**.
+Este proyecto desarrolla un sistema basado en microservicios independientes, donde cada operación del CRUD (Create, Read, Update y Delete) corresponde a un servicio separado.
+Cada microservicio está implementado en Golang, utiliza MongoDB como base de datos y está contenedorizado mediante Docker, con orquestación en Docker Compose.
 
-El objetivo del parcial es demostrar el uso de:
+El trabajo busca evidenciar conocimientos en:
 
-- Arquitectura de microservicios  
-- Golang + mongo-go-driver  
-- Docker + Docker Compose  
-- Pruebas unitarias  
-- Buenas prácticas de desarrollo  
-- Backup de base de datos  
-- Postman para validación  
-- Preparación para CI/CD en GitHub Actions  
+Arquitectura de microservicios
 
----
+Go + mongo-go-driver
 
-## 📂 Estructura del Proyecto
+Docker y Docker Compose
 
+Pruebas unitarias
+
+Buenas prácticas de desarrollo
+
+Backup y restauración de bases de datos MongoDB
+
+Uso de Postman para validación
+
+Preparación para CI/CD con GitHub Actions
+
+1. Estructura del Proyecto
 crud-albums/
-│── create/ # Microservicio CREATE
-│── read/ # Microservicio READ
-│── update/ # Microservicio UPDATE
-│── delete/ # Microservicio DELETE
-│── backup/ # Archivo de respaldo Mongo
-│── postman/ # Colección de pruebas
+│── create/               # Microservicio CREATE
+│── read/                 # Microservicio READ
+│── update/               # Microservicio UPDATE
+│── delete/               # Microservicio DELETE
+│── backup/               # Respaldos de MongoDB
+│── postman/              # Colección Postman
 │── docker-compose.yml
 │── .env
 │── README.md
@@ -32,27 +37,22 @@ crud-albums/
 Cada microservicio contiene:
 
 controller.go
-repository.go
 service.go
+repository.go
 model.go
 main.go
 Dockerfile
 go.mod
 go.sum
 
+2. Arquitectura General
 
----
-
-## 🧱 Arquitectura General
-
-
+Flujo interno:
 
 Cliente → Controller → Service → Repository → MongoDB
 
 
-Arquitectura de servicios:
-
-
+Servicios orquestados:
 
 Docker Compose
 ├── create (8001)
@@ -61,48 +61,31 @@ Docker Compose
 ├── delete (8004)
 └── mongo (27017)
 
+3. Ejecución del Proyecto con Docker Compose
+Requisitos previos
 
----
+Docker
 
-## 🐳 Ejecución del Proyecto (Docker Compose)
+Docker Compose
 
-### Requisitos
-
-- Docker  
-- Docker Compose  
-- Archivo `.env`:
-
-
-
+Archivo .env
 MONGO_USER=admin
 MONGO_PASS=admin123
 MONGO_DB=clientsdb
 MONGO_COLLECTION=clients
 
-
-### Ejecutar todos los servicios
-
-
-
+Levantar la plataforma completa
 docker compose up --build
 
-
-### Detener los servicios
-
-
-
+Detener todos los servicios
 docker compose down
 
-
----
-
-## 🔌 Endpoints de los Microservicios
-
-### ➤ Crear Cliente (CREATE)
-
-
-
+4. Endpoints de los Microservicios
+Crear Cliente (CREATE)
 POST http://localhost:8001/clients
+
+
+Body:
 
 {
   "name": "Daniela",
@@ -110,17 +93,17 @@ POST http://localhost:8001/clients
   "phone": "3210001111"
 }
 
-➤ Obtener Todos los Clientes (READ)
+Obtener todos los clientes (READ)
 GET http://localhost:8002/clients
 
-➤ Obtener Cliente por ID
+Obtener cliente por ID
 GET http://localhost:8002/clients/{id}
 
-➤ Actualizar Cliente (UPDATE)
+Actualizar Cliente (UPDATE)
 PUT http://localhost:8003/clients/{id}
 
 
-Body JSON:
+Body:
 
 {
   "name": "Nuevo Nombre",
@@ -128,26 +111,29 @@ Body JSON:
   "phone": "3001112222"
 }
 
-➤ Eliminar Cliente (DELETE)
+Eliminar Cliente (DELETE)
 DELETE http://localhost:8004/clients/{id}
 
-🧪 Pruebas Unitarias
+5. Pruebas Unitarias
 
-Cada microservicio tiene pruebas unitarias para su controlador.
+Cada microservicio incluye pruebas unitarias enfocadas en su controlador.
 
-Ejecutar pruebas
+Ejecutar pruebas:
+
 go test ./...
 
-Ver cobertura
+
+Ver cobertura:
+
 go test ./... -cover
 
 
-Ejemplo esperado:
+Ejemplo de salida:
 
-ok  	create	0.312s	coverage: 90.0% of statements
+ok    create   0.31s   coverage: 90.0% of statements
 
-📦 Backup y Restore de MongoDB
-Generar backup dentro del contenedor
+6. Backup y Restore de MongoDB
+Crear un backup dentro del contenedor
 docker exec -it mongo-albums bash
 
 mongodump \
@@ -157,16 +143,18 @@ mongodump \
   --db "clientsdb" \
   --out "/backup"
 
-tar -czvf /backup-YYYYMMDD-HHMM.tar.gz /backup
 
+Comprimir:
+
+tar -czvf /backup-YYYYMMDD-HHMM.tar.gz /backup
 exit
 
-Copiar backup a tu máquina local
+Exportar backup al equipo local
 docker cp mongo-albums:/backup-20251117-1650.tar.gz ./backup/
 
-🧪 Colección de Postman
+7. Colección de Postman
 
-Se incluye una colección exportada en:
+Se incluye en:
 
 /postman/clients-crud.postman_collection.json
 
@@ -175,22 +163,22 @@ Para usarla:
 
 Abrir Postman
 
-Importar archivo
+Importar el archivo
 
 Ejecutar pruebas
 
-🛠 Preparación para CI/CD
+8. Preparación para CI/CD
 
-El proyecto está preparado para integrar:
+El proyecto está preparado para incorporar:
 
 GitHub Actions
 
-Ejecución automática de tests
+Ejecución automática de pruebas
 
 Build y push de imágenes
 
-Escaneo de seguridad (Trivy)
+Escaneo de seguridad con Trivy
 
-Releases automáticos
+Flujo de despliegue automático
 
-(Workflow ci.yml pendiente.)
+Archivo ci.yml pendiente de integración.
