@@ -5,12 +5,12 @@ import (
     "net/http"
 )
 
-// Interface que usaremos para poder cambiar el servicio en pruebas
+// Interfaz para cambiar el servicio en pruebas
 type ClientCreator interface {
     Create(Client) error
 }
 
-// Por defecto, este apuntará al servicio real
+//  apunta al servicio real
 var clientService ClientCreator = &ClientService{}
 
 func CreateClientHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func CreateClientHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // 👇 Aquí usamos la variable global clientService (que en test cambiaremos)
+    //  usamos la variable global clientService 
     if err := clientService.Create(client); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
